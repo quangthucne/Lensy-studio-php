@@ -1,0 +1,79 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+:root {
+	/* Updated color palette for photography studio: warm earth tones, cream background, forest green accent */
+	--background: 0.98 0.01 70; /* oklch components */
+	--foreground: 0.2 0 0;
+	--card: 1 0 0;
+	--card-foreground: 0.2 0 0;
+	--popover: 1 0 0;
+	--popover-foreground: 0.2 0 0;
+	--primary: 0.25 0.05 120;
+	--primary-foreground: 0.98 0 0;
+	--secondary: 0.75 0.08 45;
+	--secondary-foreground: 0.2 0 0;
+	--muted: 0.88 0.02 70;
+	--muted-foreground: 0.5 0 0;
+	--accent: 0.25 0.08 120;
+	--accent-foreground: 0.98 0 0;
+	--destructive: 0.577 0.245 27.325;
+	--destructive-foreground: 0.577 0.245 27.325;
+	--border: 0.9 0.01 70;
+	--input: 0.96 0.01 70;
+	--ring: 0.25 0.05 120;
+	--chart-1: 0.65 0.15 45;
+	--chart-2: 0.55 0.12 25;
+	--chart-3: 0.25 0.06 120;
+	--chart-4: 0.8 0.1 60;
+	--chart-5: 0.7 0.1 30;
+	--radius: 0.5rem;
+	--sidebar: 0.98 0.01 70;
+	--sidebar-foreground: 0.2 0 0;
+	--sidebar-primary: 0.25 0.05 120;
+	--sidebar-primary-foreground: 0.98 0 0;
+	--sidebar-accent: 0.75 0.08 45;
+	--sidebar-accent-foreground: 0.2 0 0;
+	--sidebar-border: 0.9 0.01 70;
+	--sidebar-ring: 0.25 0.05 120;
+}
+
+.dark {
+	--background: 0.15 0 0;
+	--foreground: 0.95 0 0;
+	--card: 0.2 0 0;
+	--card-foreground: 0.95 0 0;
+	--popover: 0.2 0 0;
+	--popover-foreground: 0.95 0 0;
+	--primary: 0.8 0.08 120;
+	--primary-foreground: 0.15 0 0;
+	--secondary: 0.85 0.1 45;
+	--secondary-foreground: 0.15 0 0;
+	--muted: 0.35 0 0;
+	--muted-foreground: 0.7 0 0;
+	--accent: 0.8 0.1 120;
+	--accent-foreground: 0.15 0 0;
+	--destructive: 0.396 0.141 25.723;
+	--destructive-foreground: 0.637 0.237 25.331;
+	--border: 0.3 0 0;
+	--input: 0.25 0 0;
+	--ring: 0.8 0.08 120;
+	--chart-1: 0.75 0.15 45;
+	--chart-2: 0.65 0.12 25;
+	--chart-3: 0.8 0.08 120;
+	--chart-4: 0.7 0.1 60;
+	--chart-5: 0.6 0.1 30;
+	--sidebar: 0.2 0 0;
+	--sidebar-foreground: 0.95 0 0;
+	--sidebar-primary: 0.8 0.08 120;
+	--sidebar-primary-foreground: 0.95 0 0;
+	--sidebar-accent: 0.85 0.1 45;
+	--sidebar-accent-foreground: 0.15 0 0;
+	--sidebar-border: 0.3 0 0;
+	--sidebar-ring: 0.8 0.08 120;
+}
+
+body {
+    background-color: oklch(var(--background));
+    color: oklch(var(--foreground));
+    font-family: 'Poppins', sans-serif;
+}
