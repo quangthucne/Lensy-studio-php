@@ -1,15 +1,25 @@
-<?php include 'includes/head.php'; ?>
-<?php include 'includes/header.php'; ?>
+<?php include 'components/head.php'; ?>
+<?php include 'components/header.php'; ?>
 
 <?php
-$categories = [
-    ["id" => "cameras", "name" => "Máy Ảnh", "icon" => "📷"],
-    ["id" => "lenses", "name" => "Ống Kính", "icon" => "🔍"],
-    ["id" => "lighting", "name" => "Đèn Chiếu Sáng", "icon" => "💡"],
-    ["id" => "stabilization", "name" => "Ổn Định Hình Ảnh", "icon" => "🎥"],
-    ["id" => "audio", "name" => "Thiết Bị Âm Thanh", "icon" => "🎤"],
-    ["id" => "accessories", "name" => "Phụ Kiện", "icon" => "⚙️"],
-];
+// Fetch categories
+$stmt = $pdo->prepare("SELECT * FROM categories WHERE type = 'rental_gear'");
+$stmt->execute();
+$dbCategories = $stmt->fetchAll();
+
+$categories = [];
+foreach ($dbCategories as $cat) {
+    if ($cat['slug'] === 'rental-cameras') $id = 'cameras';
+    elseif ($cat['slug'] === 'rental-lenses') $id = 'lenses';
+    elseif ($cat['slug'] === 'rental-lighting') $id = 'lighting';
+    else $id = 'accessories'; // Simplified mapping
+
+    $categories[] = [
+        "id" => $id, 
+        "name" => $cat['name'], 
+        "icon" => $cat['icon']
+    ];
+}
 
 $dateRanges = [
     ["id" => "1day", "label" => "1 Ngày", "multiplier" => 1],
@@ -19,83 +29,44 @@ $dateRanges = [
     ["id" => "90days", "label" => "3 Tháng", "multiplier" => 18],
 ];
 
-// Simplified equipment list for PHP - in real app, fetch from DB
-$equipment = [
-    [
-        "id" => 1,
-        "category" => "cameras",
-        "name" => "Canon EOS R5C",
-        "basePrice" => 2800000,
-        "specs" => "Full Frame Mirrorless, 45MP",
-        "image" => "assets/equipment-canon-r5.jpg", // Using local placeholder path
-        "description" => "Máy ảnh mirrorless full frame chuyên nghiệp cao cấp với khả năng quay video 8K tuyệt vời",
-        "features" => ["Cảm Biến Full Frame 45MP", "Quay 8K Video @ 24p", "Lấy Nét Chuyên Nghiệp AI"],
-        "insurance" => 500000,
-        "deposit" => 5000000
-    ],
-    // ... add more items from source if needed
-    [
-        "id" => 2,
-        "category" => "cameras",
-        "name" => "Nikon Z9",
-        "basePrice" => 3200000,
-        "specs" => "Full Frame Mirrorless, 45.7MP",
-        "image" => "assets/equipment-nikon-z9.jpg",
-        "description" => "Máy ảnh mirrorless hàng đầu của Nikon với hiệu năng quay phim vượt trội",
-        "features" => ["Full Frame 45.7MP", "Quay 8K Video Chất Lượng Cao", "Lấy Nét 493 Điểm"],
-        "insurance" => 600000,
-        "deposit" => 6000000
-    ],
-    [
-        "id" => 4,
-        "category" => "lenses",
-        "name" => "RF 24-70mm f/2.8L IS USM",
-        "basePrice" => 1200000,
-        "specs" => "Ống Kính Zoom Tiêu Chuẩn, Canon RF Mount",
-        "image" => "assets/equipment-lens-24-70.jpg",
-        "description" => "Ống kính zoom tiêu chuẩn chuyên nghiệp với khẩu độ f/2.8 cố định",
-        "features" => ["Khoảng Zoom 24-70mm", "Khẩu Độ f/2.8 Cố Định", "Ổn Định Hình Ảnh 5.5 Stops"],
-        "insurance" => 200000,
-        "deposit" => 2400000
-    ],
-    // ... Add at least one item per category for demo
-    [
-        "id" => 9,
-        "category" => "lighting",
-        "name" => "Godox SL-60W Đèn LED Studio",
-        "basePrice" => 600000,
-        "specs" => "Bảng Đèn LED 60W Chuyên Nghiệp",
-        "image" => "assets/equipment-lighting-godox.jpg",
-        "description" => "Đèn LED liên tục chuyên nghiệp cho studio với độ chính xác màu sắc CRI 95+ xuất sắc",
-        "features" => ["Công Suất 60W", "Nhiệt Độ Màu 5600K", "CRI 95+ Chuẩn Xác"],
-        "insurance" => 100000,
-        "deposit" => 1200000
-    ],
-    [
-        "id" => 12,
-        "category" => "stabilization",
-        "name" => "DJI RS 3 Mini Gimbal Cầm Tay",
-        "basePrice" => 1000000,
-        "specs" => "Gimbal Ổn Định Máy Ảnh Mirrorless",
-        "image" => "assets/equipment-tripod.jpg",
-        "description" => "Gimbal cầm tay ổn định chuyên nghiệp nhẹ nhàng",
-        "features" => ["Tải Trọng 1.9kg", "Thời Lượng Pin 11.5 Giờ", "Chế Độ 3 Trục Ổn Định"],
-        "insurance" => 200000,
-        "deposit" => 2000000
-    ],
-    [
-        "id" => 15,
-        "category" => "audio",
-        "name" => "Rode Wireless GO II",
-        "basePrice" => 350000,
-        "specs" => "Micro Không Dây Chuyên Nghiệp",
-        "image" => "assets/equipment-microphone.jpg",
-        "description" => "Micro không dây nhỏ gọn chuyên nghiệp",
-        "features" => ["Phạm Vi 200m Không Dây", "Ghi Âm Sao Lưu Tích Hợp", "Pin 7 Giờ Liên Tục"],
-        "insurance" => 70000,
-        "deposit" => 700000
-    ]
-];
+// Fetch equipment
+$stmt = $pdo->prepare("
+    SELECT p.*, c.slug as category_slug 
+    FROM products p 
+    JOIN categories c ON p.category_id = c.id 
+    WHERE c.type = 'rental_gear' AND p.is_active = 1
+");
+$stmt->execute();
+$dbEquipment = $stmt->fetchAll();
+
+$equipment = [];
+foreach ($dbEquipment as $item) {
+    $catSlug = $item['category_slug'];
+    if ($catSlug === 'rental-cameras') $catId = 'cameras';
+    elseif ($catSlug === 'rental-lenses') $catId = 'lenses';
+    elseif ($catSlug === 'rental-lighting') $catId = 'lighting';
+    else $catId = 'accessories';
+
+    $specs = json_decode($item['specifications'], true);
+    $specStr = $specs['specs'] ?? $item['description'];
+    
+    // Parse features if stored in JSON or just use description
+    $features = isset($specs['features']) ? $specs['features'] : explode(',', $item['description']);
+
+    $equipment[] = [
+        "id" => $item['id'],
+        "category" => $catId,
+        "name" => $item['name'],
+        "basePrice" => $item['rental_price_per_day'],
+        "specs" => $specStr,
+        "image" => $item['image_url'],
+        "description" => $item['description'],
+        "features" => array_slice($features, 0, 3), // Limit features
+        "insurance" => $item['insurance_fee'],
+        "deposit" => $item['deposit_fee']
+    ];
+}
+?>
 ?>
 
 <main class="w-full bg-background text-foreground">
@@ -207,15 +178,13 @@ $equipment = [
                                     </div>
                                 </div>
 
-                                <div class="flex gap-2 pt-2">
-                                    <button class="outline-primary text-primary-foreground hover:bg-primary/90 font-semibold py-6 rounded-md flex-1">
-                                        Thêm vào giỏ
+                                <div class="pt-2">
+                                    <button 
+                                        onclick="addRentalToCart(this, <?php echo $item['basePrice']; ?>, <?php echo $item['id']; ?>, '<?php echo addslashes($item['name']); ?>', '<?php echo $item['image']; ?>')"
+                                        class="w-full bg-foreground text-background hover:bg-foreground/90 font-semibold py-4 rounded-md flex items-center justify-center gap-2 transition-colors">
+                                        <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                                        Thêm vào giỏ hàng
                                     </button>
-                                    <a href="booking.php" class="flex-1">
-                                        <button class="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold py-6 rounded-md">
-                                            Cho Thuê
-                                        </button>
-                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -282,6 +251,19 @@ $equipment = [
         // Initial calculation
         updatePrices();
 
+        // Wrapper for dynamic price cart addition
+        window.addRentalToCart = function(btn, basePrice, id, name, image) {
+            const finalPrice = Math.round(basePrice * currentMultiplier);
+            const item = {
+                id: id,
+                name: name,
+                price: finalPrice.toString(), // Cart expects string
+                image: image,
+                quantity: 1
+            };
+            window.addToCart(item, btn); // Call global handler with button ref
+        };
+
         dateBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const multiplier = parseFloat(btn.getAttribute('data-multiplier'));
@@ -304,4 +286,4 @@ $equipment = [
     });
 </script>
 
-<?php include 'includes/footer.php'; ?>
+<?php include 'components/footer.php'; ?>

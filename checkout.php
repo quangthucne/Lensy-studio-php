@@ -1,5 +1,17 @@
-<?php include 'includes/head.php'; ?>
-<?php include 'includes/header.php'; ?>
+<?php
+require_once 'config/config.php';
+require_once 'config/db.php';
+require_once 'helpers/functions.php';
+
+// RBAC: Admins cannot checkout
+if (hasRole($pdo, 'admin')) {
+    setFlashMessage('error', 'Administrators cannot perform checkout. Please use the Admin Dashboard.');
+    header("Location: admin/index.php");
+    exit();
+}
+?>
+<?php include 'components/head.php'; ?>
+<?php include 'components/header.php'; ?>
 
 <main class="w-full bg-background text-foreground min-h-screen">
     <section class="pt-28 pb-12 bg-gradient-to-b from-muted to-background">
@@ -67,15 +79,24 @@
                         </div>
                     </div>
 
-                    <!-- Payment Info Placeholder -->
                       <div class="bg-card border border-border rounded-lg p-8">
-                        <h2 class="text-2xl font-bold mb-6">Thông Tin Thanh Toán</h2>
+                        <h2 class="text-2xl font-bold mb-6">Phương Thức Thanh Toán</h2>
                         <div class="space-y-4">
-                            <input type="text" placeholder="Số thẻ" class="w-full px-4 py-3 rounded-lg border border-border bg-background">
-                            <div class="grid grid-cols-2 gap-4">
-                                <input type="text" placeholder="MM/YY" class="w-full px-4 py-3 rounded-lg border border-border bg-background">
-                                <input type="text" placeholder="CVC" class="w-full px-4 py-3 rounded-lg border border-border bg-background">
-                            </div>
+                            <label class="flex items-center gap-3 p-4 border border-border rounded-lg cursor-pointer hover:bg-secondary/5 transition-colors">
+                                <input type="radio" name="paymentMethod" value="cash" class="w-5 h-5 text-primary border-primary focus:ring-primary" checked>
+                                <div class="flex flex-col">
+                                    <span class="font-semibold">Thanh toán Tiền mặt</span>
+                                    <span class="text-sm text-muted-foreground">Thanh toán trực tiếp khi nhận thiết bị / sử dụng dịch vụ tại Studio.</span>
+                                </div>
+                            </label>
+                            
+                            <label class="flex items-center gap-3 p-4 border border-border rounded-lg cursor-pointer hover:bg-secondary/5 transition-colors">
+                                <input type="radio" name="paymentMethod" value="vnpay" class="w-5 h-5 text-primary border-primary focus:ring-primary">
+                                <div class="flex flex-col">
+                                    <span class="font-semibold">Thanh toán qua VNPay</span>
+                                    <span class="text-sm text-muted-foreground">Thanh toán online nhanh chóng và an toàn qua cổng VNPay.</span>
+                                </div>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -125,61 +146,105 @@
         const totalEl = document.getElementById('checkout-total');
         const form = document.getElementById('checkout-form');
 
-        const cart = JSON.parse(localStorage.getItem('lensy_cart') || '[]');
+        // Cart is loaded by fetchCart() in footer.php
+        window.addEventListener('cartDataLoaded', () => {
+            renderCheckoutSummary();
+        });
 
-        if (cart.length === 0) {
-            window.location.href = 'cart.php'; // Redirect if empty
-            return;
+        function renderCheckoutSummary() {
+            const currentCart = window.cart || [];
+
+            if (currentCart.length === 0) {
+                window.location.href = 'cart.php'; // Redirect if empty
+                return;
+            }
+
+            checkoutItems.innerHTML = '';
+            let subtotal = 0;
+            currentCart.forEach(item => {
+                const itemTotal = parseInt(item.price) * item.quantity;
+                subtotal += itemTotal;
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'flex justify-between items-center text-sm';
+                itemDiv.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <img src="${item.image}" class="w-12 h-12 rounded object-cover">
+                        <div>
+                            <p class="font-semibold">${item.name}</p>
+                            <p class="text-muted-foreground">SL: ${item.quantity}</p>
+                        </div>
+                    </div>
+                    <span>${parseInt(item.price).toLocaleString('vi-VN')}</span>
+                `;
+                checkoutItems.appendChild(itemDiv);
+            });
+
+            const tax = subtotal * 0.1;
+            const total = subtotal + tax;
+
+            subtotalEl.innerText = subtotal.toLocaleString('vi-VN') + ' VND';
+            taxEl.innerText = tax.toLocaleString('vi-VN') + ' VND';
+            totalEl.innerText = total.toLocaleString('vi-VN') + ' VND';
         }
 
-        // Render Summary
-        let subtotal = 0;
-        cart.forEach(item => {
-            const itemTotal = parseInt(item.price) * item.quantity;
-            subtotal += itemTotal;
-            
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'flex justify-between items-center text-sm';
-            itemDiv.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <img src="${item.image}" class="w-12 h-12 rounded object-cover">
-                    <div>
-                        <p class="font-semibold">${item.name}</p>
-                        <p class="text-muted-foreground">SL: ${item.quantity}</p>
-                    </div>
-                </div>
-                <span>${parseInt(item.price).toLocaleString('vi-VN')}</span>
-            `;
-            checkoutItems.appendChild(itemDiv);
-        });
-
-        const tax = subtotal * 0.1;
-        const total = subtotal + tax;
-
-        subtotalEl.innerText = subtotal.toLocaleString('vi-VN') + ' VND';
-        taxEl.innerText = tax.toLocaleString('vi-VN') + ' VND';
-        totalEl.innerText = total.toLocaleString('vi-VN') + ' VND';
-
         // Handle Submit
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Validate form (basic)
-            
-            Swal.fire({
-                title: 'Thành công!',
-                text: 'Yêu cầu của bạn đã được gửi thành công. Chúng tôi sẽ liên hệ với bạn trong vòng 24 giờ.',
-                icon: 'success',
-                confirmButtonColor: 'var(--primary)',
-                confirmButtonText: 'OK'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    localStorage.removeItem('lensy_cart');
-                    window.location.href = 'index.php';
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            data.totalAmount = document.getElementById('checkout-total').innerText.replace(/\D/g, '');
+
+            try {
+                const response = await fetch('controllers/process_checkout.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+
+                if (result.success) {
+                    if (result.redirect) {
+                        window.location.href = result.redirect;
+                        return;
+                    }
+                    
+                    Swal.fire({
+                        title: 'Thành công!',
+                        html: `Đơn hàng của bạn đã được tiếp nhận.<br><br>Ghi nhớ Mã Đơn Hàng của bạn là: <br><strong style="font-size: 1.5em; color: #e1ad01; user-select: auto;">${result.orderCode}</strong><br><br>Vui lòng lưu lại mã này hoặc kiểm tra Email (nếu có cấu hình hệ thống) để tra cứu sau này.`,
+                        icon: 'success',
+                        confirmButtonColor: 'var(--primary)',
+                        confirmButtonText: 'Đã hiểu'
+                    }).then(() => {
+                        window.location.href = 'index.php';
+                    });
+                } else {
+                     Swal.fire({
+                        title: 'Lỗi!',
+                        text: result.message || 'Có lỗi xảy ra.',
+                        icon: 'error',
+                         confirmButtonColor: 'var(--primary)'
+                    });
                 }
-            });
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    title: 'Lỗi!',
+                    text: 'Không thể kết nối đến máy chủ.',
+                    icon: 'error'
+                });
+            }
         });
+
+        // Render initially if already loaded
+        if (window.cart && window.cart.length > 0) {
+            renderCheckoutSummary();
+        }
     });
 </script>
 
-<?php include 'includes/footer.php'; ?>
+<?php include 'components/footer.php'; ?>

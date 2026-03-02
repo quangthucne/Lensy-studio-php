@@ -1,5 +1,5 @@
-<?php include 'includes/head.php'; ?>
-<?php include 'includes/header.php'; ?>
+<?php include 'components/head.php'; ?>
+<?php include 'components/header.php'; ?>
 
 <?php
 $categories = [
@@ -10,140 +10,64 @@ $categories = [
     ["id" => "accessories", "name" => "Phụ Kiện"],
 ];
 
-$costumes = [
-    [
-        "id" => 1,
-        "category" => "ao-dai",
-        "name" => "Áo Dài Đỏ Truyền Thống",
-        "price" => "500,000",
-        "rentalDays" => "3 ngày",
-        "image" => "assets/costume-red-ao-dai.jpg",
-        "description" => "Áo dài lụa đỏ cổ điển với họa tiết thêu vàng cho ngày Tết",
-        "sizes" => "XS - XXL",
-        "featured" => true,
-    ],
-    [
-        "id" => 2,
-        "category" => "ao-dai",
-        "name" => "Áo Dài Trắng Hiện Đại",
-        "price" => "500,000",
-        "rentalDays" => "3 ngày",
-        "image" => "assets/costume-white-ao-dai.jpg",
-        "description" => "Áo dài trắng hiện đại với họa tiết tinh tế",
-        "sizes" => "XS - XXL",
-        "featured" => false,
-    ],
-    [
-        "id" => 3,
-        "category" => "ao-dai",
-        "name" => "Áo Dài Hồng Thanh Lịch",
-        "price" => "500,000",
-        "rentalDays" => "3 ngày",
-        "image" => "assets/costume-pink-ao-dai.jpg",
-        "description" => "Áo dài hồng nhẹ nhàng hoàn hảo cho những buổi chụp ảnh lãng mạn",
-        "sizes" => "XS - XXL",
-        "featured" => false,
-    ],
-    [
-        "id" => 4,
-        "category" => "wedding",
-        "name" => "Váy Cưới Trắng Cổ Điển",
-        "price" => "2,000,000",
-        "rentalDays" => "7 ngày",
-        "image" => "assets/costume-wedding-white.jpg",
-        "description" => "Váy cưới trắng bất tận với những chi tiết thanh lịch",
-        "sizes" => "XS - XXL",
-        "featured" => true,
-    ],
-    [
-        "id" => 5,
-        "category" => "wedding",
-        "name" => "Váy Cưới Ball Gown",
-        "price" => "2,500,000",
-        "rentalDays" => "7 ngày",
-        "image" => "assets/costume-wedding-ballgown.jpg",
-        "description" => "Váy cưới ball gown sang trọng cho những khoảnh khắc khó quên",
-        "sizes" => "XS - XXL",
-        "featured" => false,
-    ],
-    [
-        "id" => 6,
-        "category" => "wedding",
-        "name" => "Váy Cưới Đuôi Cá",
-        "price" => "2,200,000",
-        "rentalDays" => "7 ngày",
-        "image" => "assets/costume-wedding-mermaid.jpg",
-        "description" => "Váy cưới dáng đuôi cá hiện đại",
-        "sizes" => "XS - XXL",
-        "featured" => false,
-    ],
-    [
-        "id" => 7,
-        "category" => "vintage",
-        "name" => "Váy Cổ Điển Thập Niên 50",
-        "price" => "600,000",
-        "rentalDays" => "3 ngày",
-        "image" => "assets/costume-vintage-50s.jpg",
-        "description" => "Váy lấy cảm hứng từ những năm 1950 với họa tiết chấm bi",
-        "sizes" => "XS - L",
-        "featured" => false,
-    ],
-    [
-        "id" => 8,
-        "category" => "vintage",
-        "name" => "Váy Cổ Điển Victorian",
-        "price" => "1,200,000",
-        "rentalDays" => "5 ngày",
-        "image" => "assets/costume-vintage-victorian.jpg",
-        "description" => "Váy lộng lẫy lấy cảm hứng từ thời Victoria với chi tiết ren",
-        "sizes" => "XS - XXL",
-        "featured" => false,
-    ],
-    [
-        "id" => 9,
-        "category" => "vintage",
-        "name" => "Váy Flapper",
-        "price" => "700,000",
-        "rentalDays" => "3 ngày",
-        "image" => "assets/costume-vintage-flapper.jpg",
-        "description" => "Váy flapper quyến rũ của những năm 1920 với hạt cườm",
-        "sizes" => "XS - L",
-        "featured" => false,
-    ],
-    [
-        "id" => 10,
-        "category" => "accessories",
-        "name" => "Bộ Trang Sức Vàng",
-        "price" => "200,000",
-        "rentalDays" => "3 ngày",
-        "image" => "assets/costume-jewelry-gold.jpg",
-        "description" => "Bộ trang sức vàng truyền thống cho Áo Dài",
-        "sizes" => "Một Cỡ",
-        "featured" => false,
-    ],
-    [
-        "id" => 11,
-        "category" => "accessories",
-        "name" => "Bộ Sưu Tập Voan Cưới",
-        "price" => "300,000",
-        "rentalDays" => "3 ngày",
-        "image" => "assets/costume-veil-bridal.jpg",
-        "description" => "Voan cưới thanh lịch với nhiều kiểu dáng khác nhau",
-        "sizes" => "Một Cỡ",
-        "featured" => false,
-    ],
-    [
-        "id" => 12,
-        "category" => "accessories",
-        "name" => "Thuê Giày Cao Gót",
-        "price" => "150,000",
-        "rentalDays" => "3 ngày",
-        "image" => "assets/costume-heels-designer.jpg",
-        "description" => "Giày cao gót hàng hiệu cao cấp để hoàn thiện vẻ ngoài của bạn",
-        "sizes" => "35 - 41",
-        "featured" => false,
-    ],
-];
+
+// Fetch categories for filter
+$stmt = $pdo->prepare("SELECT * FROM categories WHERE type = 'rental_fashion'");
+$stmt->execute();
+$dbCategories = $stmt->fetchAll();
+
+$categories = [["id" => "all", "name" => "Tất Cả"]];
+foreach ($dbCategories as $cat) {
+    if ($cat['slug'] === 'fashion-ao-dai') $id = 'ao-dai';
+    elseif ($cat['slug'] === 'fashion-wedding') $id = 'wedding'; 
+    elseif ($cat['slug'] === 'fashion-vintage') $id = 'vintage';
+    else $id = $cat['slug']; // fallback
+
+    $categories[] = ["id" => $id, "name" => $cat['name'], "db_id" => $cat['id']];
+}
+// Add manually others if missing or handle better mapping
+if (count($categories) == 1) {
+     $categories = [
+        ["id" => "all", "name" => "Tất Cả"],
+        ["id" => "ao-dai", "name" => "Áo Dài"],
+        ["id" => "wedding", "name" => "Váy Cưới"],
+        ["id" => "vintage", "name" => "Đồ Cổ Điển"],
+        ["id" => "accessories", "name" => "Phụ Kiện"],
+    ];
+}
+
+// Fetch products
+$stmt = $pdo->prepare("
+    SELECT p.*, c.slug as category_slug 
+    FROM products p 
+    JOIN categories c ON p.category_id = c.id 
+    WHERE c.type = 'rental_fashion' AND p.is_active = 1
+");
+$stmt->execute();
+$dbProducts = $stmt->fetchAll();
+
+$costumes = [];
+foreach ($dbProducts as $prod) {
+    // Map DB category slug to view filter id
+    $catSlug = $prod['category_slug'];
+    if ($catSlug === 'fashion-ao-dai') $catId = 'ao-dai';
+    elseif ($catSlug === 'fashion-wedding') $catId = 'wedding';
+    elseif ($catSlug === 'fashion-vintage') $catId = 'vintage';
+    else $catId = $catSlug;
+
+    $costumes[] = [
+        "id" => $prod['id'],
+        "category" => $catId,
+        "name" => $prod['name'],
+        "price" => number_format($prod['rental_price_per_day']),
+        "rentalDays" => "3 ngày", // Default or fetch from somewhere
+        "image" => $prod['image_url'],
+        "description" => $prod['description'],
+        "sizes" => $prod['sizes'] ?? "Standard",
+        "featured" => (bool)$prod['is_featured'],
+    ];
+}
+?>
 ?>
 
 <main class="w-full bg-background text-foreground">
@@ -323,4 +247,4 @@ $costumes = [
     });
 </script>
 
-<?php include 'includes/footer.php'; ?>
+<?php include 'components/footer.php'; ?>

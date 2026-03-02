@@ -59,10 +59,25 @@
 
 <!-- Global Cart Logic -->
 <script>
-    window.cart = JSON.parse(localStorage.getItem('lensy_cart') || '[]');
+    window.cart = [];
     
+    async function fetchCart() {
+        try {
+            const res = await fetch('controllers/cart/get.php');
+            const data = await res.json();
+            if (data.success) {
+                window.cart = data.data;
+                updateCartCount();
+                // Dispatch event in case other components (like cart page) need to re-render
+                window.dispatchEvent(new Event('cartDataLoaded'));
+            }
+        } catch (e) {
+            console.error("Error fetching cart", e);
+        }
+    }
+
     function updateCartCount() {
-        const count = window.cart.reduce((acc, item) => acc + item.quantity, 0);
+        const count = window.cart.reduce((acc, item) => acc + parseInt(item.quantity), 0);
         const badge = document.getElementById('cart-badge');
         if (badge) {
             badge.innerText = count;
@@ -74,39 +89,49 @@
         }
     }
 
-    window.addToCart = function(item) {
-        const existing = window.cart.find(i => i.id === item.id && i.name === item.name);
-        if (existing) {
-            existing.quantity += item.quantity || 1;
-        } else {
-            window.cart.push({ ...item, quantity: item.quantity || 1 });
+    window.addToCart = async function(item, btnElement = null) {
+        const btn = btnElement || (window.event && window.event.currentTarget);
+        let originalContent = '';
+        if (btn) {
+            originalContent = btn.innerHTML;
+            btn.innerHTML = 'Đang thêm...';
+            btn.disabled = true;
         }
-        localStorage.setItem('lensy_cart', JSON.stringify(window.cart));
-        updateCartCount();
+
+        try {
+            const res = await fetch('controllers/cart/add.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    product_id: item.id,
+                    quantity: item.quantity || 1
+                })
+            });
+            const result = await res.json();
+            
+            if (result.success) {
+                await fetchCart();
+                if (btn) btn.innerHTML = 'Đã thêm!';
+            } else {
+                if (btn) btn.innerHTML = 'Lỗi!';
+                console.error(result.message);
+            }
+        } catch (error) {
+            if (btn) btn.innerHTML = 'Lỗi!';
+            console.error("Network error", error);
+        }
         
-        // Feedback
-        const btn = event.currentTarget; // correctly target the button
-        const originalContent = btn.innerHTML;
-        btn.innerHTML = 'Đã thêm!';
-        btn.disabled = true;
-        setTimeout(() => {
-            btn.innerHTML = originalContent;
-            btn.disabled = false;
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-        }, 1000);
+        if (btn) {
+            setTimeout(() => {
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }, 1000);
+        }
     };
 
-    window.addEventListener('storage', () => {
-        window.cart = JSON.parse(localStorage.getItem('lensy_cart') || '[]');
-        updateCartCount();
-    });
-    
-    window.addEventListener('cartUpdated', () => {
-         window.cart = JSON.parse(localStorage.getItem('lensy_cart') || '[]');
-         updateCartCount();
-    });
-
-    document.addEventListener('DOMContentLoaded', updateCartCount);
+    window.addEventListener('cartUpdated', fetchCart);
+    document.addEventListener('DOMContentLoaded', fetchCart);
 </script>
 
 <!-- Initialize Icons if not already done in header -->

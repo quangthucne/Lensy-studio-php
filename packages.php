@@ -1,108 +1,8 @@
-<?php include 'includes/head.php'; ?>
-<?php include 'includes/header.php'; ?>
+<?php include 'components/head.php'; ?>
+<?php include 'components/header.php'; ?>
 
 <?php
-$packages = [
-    [
-        "category" => "Chụp Ảnh Tết",
-        "description" => "Tôn vinh năm mới với phong cách truyền thống và hiện đại",
-        "tiers" => [
-            [
-                "name" => "Cơ Bản",
-                "price" => "2,500,000",
-                "duration" => "2 giờ",
-                "photos" => "100+ ảnh chỉnh sửa",
-                "features" => ["Ảnh chân dung gia đình (studio hoặc ngoài trời)", "Chuẩn bị trang phục Áo Dài truyền thống", "Thư viện kỹ thuật số có tải xuống", "Giao hàng nhanh (5 ngày làm việc)"],
-                "cta" => "Đặt Lịch",
-                "featured" => false,
-            ],
-            [
-                "name" => "Premium",
-                "price" => "4,500,000",
-                "duration" => "4 giờ",
-                "photos" => "200+ ảnh chỉnh sửa",
-                "features" => ["Phiên tháo dài với gia đình mở rộng", "Thay quần áo nhiều lần", "Chụp tại 2 địa điểm", "Album cao cấp (20 trang)", "Chỉnh sửa ưu tiên", "Ảnh in bao gồm"],
-                "cta" => "Đặt Lịch",
-                "featured" => true,
-            ],
-            [
-                "name" => "Cao Cấp",
-                "price" => "7,000,000",
-                "duration" => "Cả ngày",
-                "photos" => "400+ ảnh chỉnh sửa",
-                "features" => ["Chụp toàn bộ ngày", "Không giới hạn địa điểm", "Hỗ trợ trang phục chuyên nghiệp", "Album cao cấp + in trên canvas", "Video tóm tắt", "Thư viện riêng tư trực tuyến", "Hỗ trợ 6 tháng"],
-                "cta" => "Đặt Lịch",
-                "featured" => false,
-            ],
-        ],
-    ],
-    [
-        "category" => "Chụp Ảnh Cưới",
-        "description" => "Ghi lại ngày đặc biệt với sự xuất sắc nghệ thuật",
-        "tiers" => [
-            [
-                "name" => "Nửa Ngày",
-                "price" => "8,000,000",
-                "duration" => "6 giờ",
-                "photos" => "300+ ảnh chỉnh sửa",
-                "features" => ["Chụp lễ + tiệc", "2 nhiếp ảnh gia", "Thư viện kỹ thuật số", "Xem trước chỉnh sửa cùng ngày", "Giao hàng USB"],
-                "cta" => "Đặt Lịch",
-                "featured" => false,
-            ],
-            [
-                "name" => "Toàn Ngày",
-                "price" => "14,000,000",
-                "duration" => "12 giờ",
-                "photos" => "600+ ảnh chỉnh sửa",
-                "features" => ["Chụp cả ngày (chuẩn bị đến tiễn)", "2 nhiếp ảnh gia + 1 quay video", "Album cao cấp (40 trang)", "Chụp kỷ niệm bao gồm", "Video tóm tắt", "Lựa chọn ảnh in", "Thư viện trực tuyến vĩnh viễn"],
-                "cta" => "Đặt Lịch",
-                "featured" => true,
-            ],
-            [
-                "name" => "Gói Premium",
-                "price" => "20,000,000",
-                "duration" => "2 ngày",
-                "photos" => "1000+ ảnh chỉnh sửa",
-                "features" => ["Chụp 2 ngày (tập duyệt + cưới)", "3 nhiếp ảnh gia + 2 quay video", "Album bìa da cao cấp", "Chụp kỷ niệm + tiền hôn nhân", "Video 4K có chỉnh sửa chuyên nghiệp", "In sách bàn cà phê", "Giao hàng kéo dài (60 ngày)"],
-                "cta" => "Đặt Lịch",
-                "featured" => false,
-            ],
-        ],
-    ],
-    [
-        "category" => "Ảnh Kỷ Niệm & Sự Kiện Đặc Biệt",
-        "description" => "Tôn vinh những cột mốc với những bức chân dung bất biến",
-        "tiers" => [
-            [
-                "name" => "Cổ Điển",
-                "price" => "1,800,000",
-                "duration" => "1.5 giờ",
-                "photos" => "75+ ảnh chỉnh sửa",
-                "features" => ["Phiên chân dung cặp đôi", "Địa điểm tùy chọn", "Thay đổi trang phục 1 lần", "Thư viện kỹ thuật số", "Giao hàng nhanh"],
-                "cta" => "Đặt Lịch",
-                "featured" => false,
-            ],
-            [
-                "name" => "Cao Cấp",
-                "price" => "3,200,000",
-                "duration" => "3 giờ",
-                "photos" => "150+ ảnh chỉnh sửa",
-                "features" => ["Phiên cặp dài hạn", "Nhiều địa điểm", "Thay đổi trang phục 3 lần", "Ảnh nhóm gia đình bao gồm", "Album nhỏ (10 trang)", "Lựa chọn in"],
-                "cta" => "Đặt Lịch",
-                "featured" => true,
-            ],
-            [
-                "name" => "Bạch Kim",
-                "price" => "5,500,000",
-                "duration" => "5 giờ",
-                "photos" => "250+ ảnh chỉnh sửa",
-                "features" => ["Chụp lễ kỷ niệm đầy đủ", "Không giới hạn địa điểm", "Trang phục chuyên nghiệp", "Album cao cấp (20 trang)", "In trên canvas (2)", "Video cắt ghép", "Thư viện riêng tư"],
-                "cta" => "Đặt Lịch",
-                "featured" => false,
-            ],
-        ],
-    ],
-];
+$packages = require 'config/packages_data.php';
 ?>
 
 <main class="w-full bg-background text-foreground">
@@ -177,7 +77,7 @@ $packages = [
                                     <?php endforeach; ?>
                                 </ul>
 
-                                <a href="booking.php">
+                                <a href="booking.php?pkg_id=<?php echo $tier['id']; ?>">
                                     <button class="w-full py-6 font-semibold rounded-md transition-colors <?php echo $tier['featured'] ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-foreground text-background hover:bg-foreground/90'; ?>">
                                         <?php echo $tier['cta']; ?>
                                     </button>
@@ -260,4 +160,4 @@ $packages = [
     </section>
 </main>
 
-<?php include 'includes/footer.php'; ?>
+<?php include 'components/footer.php'; ?>

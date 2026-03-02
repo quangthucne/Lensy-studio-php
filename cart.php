@@ -1,5 +1,5 @@
-<?php include 'includes/head.php'; ?>
-<?php include 'includes/header.php'; ?>
+<?php include 'components/head.php'; ?>
+<?php include 'components/header.php'; ?>
 
 <main class="w-full bg-background text-foreground min-h-screen">
     <section class="pt-28 pb-12 bg-gradient-to-b from-muted to-background">
@@ -61,6 +61,9 @@
     </section>
 </main>
 
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const cartItemsList = document.getElementById('cart-items-list');
@@ -70,10 +73,19 @@
         const totalDisplay = document.getElementById('total-display');
         const checkoutBtn = document.getElementById('checkout-btn');
 
-        // Load cart from localStorage
-        let cart = JSON.parse(localStorage.getItem('lensy_cart') || '[]');
+        // Cart is loaded by fetchCart() in footer.php
+        // We listen to the custom event to know when data is ready
+        window.addEventListener('cartDataLoaded', () => {
+            renderCart();
+        });
+
+        function getCart() {
+            return window.cart || [];
+        }
 
         function renderCart() {
+            const currentCart = getCart();
+
             // Clear existing items (except empty message)
             Array.from(cartItemsList.children).forEach(child => {
                 if (child.id !== 'empty-cart-message') {
@@ -81,7 +93,7 @@
                 }
             });
 
-            if (cart.length === 0) {
+            if (currentCart.length === 0) {
                 emptyCartMsg.classList.remove('hidden');
                 checkoutBtn.classList.add('pointer-events-none', 'opacity-50');
                 updateTotals();
@@ -91,12 +103,12 @@
             emptyCartMsg.classList.add('hidden');
             checkoutBtn.classList.remove('pointer-events-none', 'opacity-50');
 
-            cart.forEach((item, index) => {
+            currentCart.forEach((item, index) => {
                 const itemEl = document.createElement('div');
                 itemEl.className = 'flex flex-col sm:flex-row items-center gap-6 bg-card border border-border rounded-lg p-4 animate-in fade-in slide-in-from-bottom-4 duration-500';
                 itemEl.innerHTML = `
                     <div class="relative w-24 h-24 flex-shrink-0">
-                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover rounded-lg">
+                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover rounded-lg text-xs">
                     </div>
                     <div class="flex-1 text-center sm:text-left">
                         <h3 class="font-semibold text-lg">${item.name}</h3>
@@ -104,11 +116,11 @@
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="flex items-center border border-border rounded-md">
-                            <button class="px-3 py-1 hover:bg-muted font-bold" onclick="updateQuantity(${index}, -1)">-</button>
+                            <button class="px-3 py-1 hover:bg-muted font-bold" onclick="updateQuantity(${item.cart_id}, ${item.quantity - 1})" ${item.quantity <= 1 ? 'disabled' : ''}>-</button>
                             <span class="w-12 text-center">${item.quantity}</span>
-                            <button class="px-3 py-1 hover:bg-muted font-bold" onclick="updateQuantity(${index}, 1)">+</button>
+                            <button class="px-3 py-1 hover:bg-muted font-bold" onclick="updateQuantity(${item.cart_id}, ${item.quantity + 1})">+</button>
                         </div>
-                        <button class="p-2 text-destructive hover:bg-destructive/10 rounded-full transition-colors" onclick="removeItem(${index})">
+                        <button class="p-2 text-destructive hover:bg-destructive/10 rounded-full transition-colors" onclick="removeItem(${item.cart_id})">
                             <i data-lucide="trash-2" class="w-5 h-5"></i>
                         </button>
                     </div>
@@ -116,30 +128,74 @@
                 cartItemsList.appendChild(itemEl);
             });
 
-            // Re-initialize icons since we added new elements
-            lucide.createIcons();
+            // Re-initialize icons
+            if (typeof lucide !== 'undefined') lucide.createIcons();
             updateTotals();
         }
 
-        window.updateQuantity = (index, change) => {
-            cart[index].quantity += change;
-            if (cart[index].quantity < 1) cart[index].quantity = 1;
-            saveCart();
-            renderCart();
-        };
+        window.updateQuantity = async (cartId, newQuantity) => {
+            if (newQuantity < 1) newQuantity = 1;
 
-        window.removeItem = (index) => {
-            if(confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
-                cart.splice(index, 1);
-                saveCart();
-                renderCart();
-                // Update header count if it exists
-                window.dispatchEvent(new Event('cartUpdated')); 
+            try {
+                const res = await fetch('controllers/cart/update.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ cart_id: cartId, quantity: newQuantity })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    window.dispatchEvent(new Event('cartUpdated')); // Triggers re-fetch in footer
+                } else {
+                    Swal.fire({ title: 'Lỗi!', text: result.message, icon: 'error', confirmButtonColor: 'var(--primary)' });
+                }
+            } catch (e) {
+                console.error(e);
             }
         };
 
+        window.removeItem = async (cartId) => {
+            Swal.fire({
+                title: 'Bạn có chắc chắn?',
+                text: "Sản phẩm này sẽ bị xóa khỏi giỏ hàng!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280', // distinct gray color
+                confirmButtonText: 'Đồng ý, xóa ngay!',
+                cancelButtonText: 'Hủy'
+            }).then(async (swalResult) => {
+                if (swalResult.isConfirmed) {
+                    try {
+                        const res = await fetch('controllers/cart/remove.php', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ cart_id: cartId })
+                        });
+                        const result = await res.json();
+                        if (result.success) {
+                            window.dispatchEvent(new Event('cartUpdated'));
+                            Swal.fire({
+                                title: 'Đã xóa!',
+                                text: 'Sản phẩm đã được xóa khỏi giỏ.',
+                                icon: 'success',
+                                confirmButtonColor: 'var(--primary)',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire({ title: 'Lỗi!', text: result.message, icon: 'error', confirmButtonColor: 'var(--primary)' });
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        Swal.fire({ title: 'Lỗi!', text: 'Không kết nối được server.', icon: 'error', confirmButtonColor: 'var(--primary)' });
+                    }
+                }
+            });
+        };
+
         function updateTotals() {
-            const subtotal = cart.reduce((acc, item) => acc + (parseInt(item.price) * item.quantity), 0);
+            const currentCart = getCart();
+            const subtotal = currentCart.reduce((acc, item) => acc + (parseInt(item.price) * item.quantity), 0);
             const tax = subtotal * 0.1;
             const total = subtotal + tax;
 
@@ -148,12 +204,11 @@
             totalDisplay.innerText = total.toLocaleString('vi-VN') + ' VND';
         }
 
-        function saveCart() {
-            localStorage.setItem('lensy_cart', JSON.stringify(cart));
+        // Initial render if data is already loaded
+        if (window.cart && window.cart.length >= 0) {
+            renderCart();
         }
-
-        renderCart();
     });
 </script>
 
-<?php include 'includes/footer.php'; ?>
+<?php include 'components/footer.php'; ?>

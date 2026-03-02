@@ -1,5 +1,5 @@
-<?php include 'includes/head.php'; ?>
-<?php include 'includes/header.php'; ?>
+<?php include 'components/head.php'; ?>
+<?php include 'components/header.php'; ?>
 
 <?php
 $categories = [
@@ -282,4 +282,4 @@ $blogPosts = [
     });
 </script>
 
-<?php include 'includes/footer.php'; ?>
+<?php include 'components/footer.php'; ?>

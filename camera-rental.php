@@ -1,5 +1,5 @@
-<?php include 'includes/head.php'; ?>
-<?php include 'includes/header.php'; ?>
+<?php include 'components/head.php'; ?>
+<?php include 'components/header.php'; ?>
 
 <?php
 $categories = [
@@ -207,17 +207,13 @@ $equipment = [
                                     </div>
                                 </div>
 
-                                <div class="flex gap-2 pt-2">
+                                <div class="pt-2">
                                     <button 
                                         onclick="addRentalToCart(this, <?php echo $item['basePrice']; ?>, <?php echo $item['id']; ?>, '<?php echo addslashes($item['name']); ?>', '<?php echo $item['image']; ?>')"
-                                        class="outline-primary text-primary-foreground hover:bg-primary/90 font-semibold py-6 rounded-md flex-1 transition-colors">
-                                        Thêm vào giỏ
+                                        class="w-full bg-foreground text-background hover:bg-foreground/90 font-semibold py-4 rounded-md flex items-center justify-center gap-2 transition-colors">
+                                        <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                                        Thêm vào giỏ hàng
                                     </button>
-                                    <a href="booking.php" class="flex-1">
-                                        <button class="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold py-6 rounded-md">
-                                            Cho Thuê
-                                        </button>
-                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -294,7 +290,7 @@ $equipment = [
                 image: image,
                 quantity: 1
             };
-            window.addToCart(item); // Call global handler
+            window.addToCart(item, btn); // Call global handler with btn reference
         };
 
         dateBtns.forEach(btn => {
@@ -319,4 +315,4 @@ $equipment = [
     });
 </script>
 
-<?php include 'includes/footer.php'; ?>
+<?php include 'components/footer.php'; ?>

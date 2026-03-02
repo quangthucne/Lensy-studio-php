@@ -1,5 +1,17 @@
-<?php include 'includes/head.php'; ?>
-<?php include 'includes/header.php'; ?>
+<?php
+require_once 'config/config.php';
+require_once 'config/db.php';
+require_once 'helpers/functions.php';
+
+// RBAC: Admins cannot make bookings
+if (hasRole($pdo, 'admin')) {
+    setFlashMessage('error', 'Administrators cannot create bookings. Please use the Admin Dashboard.');
+    header("Location: admin/index.php");
+    exit();
+}
+?>
+<?php include 'components/head.php'; ?>
+<?php include 'components/header.php'; ?>
 
 <?php
 $suggestedCombos = [
@@ -118,14 +130,33 @@ $processSteps = [
                             <!-- Service Selection -->
                             <div>
                                 <h3 class="text-lg font-semibold mb-4 text-primary">
-                                    Loại Dịch Vụ
+                                    Loại Dịch Vụ / Gói Chụp Ảnh
                                 </h3>
-                                <select name="serviceType" class="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
-                                    <option value="photography">Dịch Vụ Chụp Ảnh</option>
+                                <select id="serviceType" name="serviceType" class="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary mb-4">
+                                    <option value="photography">Dịch Vụ Chụp Ảnh Cơ Bản</option>
                                     <option value="costume">Thuê Trang Phục</option>
                                     <option value="equipment">Thuê Thiết Bị</option>
                                     <option value="combined">Dịch Vụ Kết Hợp</option>
                                 </select>
+                                
+                                <?php
+                                $selectedPkgId = $_GET['pkg_id'] ?? '';
+                                $packagesData = require 'config/packages_data.php';
+                                ?>
+                                <div id="packageSelectContainer">
+                                    <select name="packageId" class="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
+                                        <option value="">-- Chọn Gói Dịch Vụ (Không bắt buộc) --</option>
+                                        <?php foreach ($packagesData as $cat): ?>
+                                            <optgroup label="<?php echo htmlspecialchars($cat['category']); ?>">
+                                                <?php foreach ($cat['tiers'] as $tier): ?>
+                                                    <option value="<?php echo htmlspecialchars($tier['id']); ?>" <?php echo $selectedPkgId === $tier['id'] ? 'selected' : ''; ?>>
+                                                        <?php echo htmlspecialchars($tier['name']); ?> - <?php echo htmlspecialchars($tier['price']); ?> VND (<?php echo htmlspecialchars($tier['duration']); ?>)
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </optgroup>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
                             </div>
 
                             <!-- Event Details -->
@@ -146,7 +177,7 @@ $processSteps = [
                             </div>
 
                             <!-- Rental Period -->
-                            <div>
+                            <div id="rentalPeriodContainer" class="hidden">
                                 <h3 class="text-lg font-semibold mb-4 text-primary">
                                     Thời Hạn Thuê
                                 </h3>
@@ -181,6 +212,30 @@ $processSteps = [
                                     Yêu Cầu Đặc Biệt
                                 </h3>
                                 <textarea name="message" rows="4" placeholder="Hãy cho chúng tôi biết về ý tưởng, sở thích hoặc yêu cầu đặc biệt của bạn" class="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+                            </div>
+
+                            <!-- Payment Method -->
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4 text-primary">
+                                    Phương Thức Thanh Toán
+                                </h3>
+                                <div class="space-y-3">
+                                    <label class="flex items-center gap-3 p-4 border border-border rounded-lg cursor-pointer hover:bg-secondary/5 transition-colors">
+                                        <input type="radio" name="paymentMethod" value="cash" class="w-5 h-5 text-primary border-primary focus:ring-primary" checked>
+                                        <div class="flex flex-col">
+                                            <span class="font-semibold">Thanh toán Tiền mặt</span>
+                                            <span class="text-sm text-muted-foreground">Thanh toán trực tiếp tại Studio.</span>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="flex items-center gap-3 p-4 border border-border rounded-lg cursor-pointer hover:bg-secondary/5 transition-colors">
+                                        <input type="radio" name="paymentMethod" value="vnpay" class="w-5 h-5 text-primary border-primary focus:ring-primary">
+                                        <div class="flex flex-col">
+                                            <span class="font-semibold">Thanh toán qua VNPay</span>
+                                            <span class="text-sm text-muted-foreground">Thanh toán online an toàn qua cổng VNPay.</span>
+                                        </div>
+                                    </label>
+                                </div>
                             </div>
 
                             <!-- Submit Button -->
@@ -313,27 +368,80 @@ $processSteps = [
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Simulate API call
             const btn = form.querySelector('button[type="submit"]');
             const originalText = btn.innerText;
             btn.innerText = 'Đang gửi...';
             btn.disabled = true;
 
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            try {
+                const formData = new FormData(form);
+                const response = await fetch('controllers/process_booking.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
 
-            Swal.fire({
-                title: "Thành công!",
-                text: "Yêu cầu đặt lịch của bạn đã được gửi thành công. Chúng tôi sẽ liên hệ với bạn trong vòng 24 giờ để xác nhận đặt lịch của bạn.",
-                icon: "success",
-                confirmButtonColor: '#e1ad01', // Hardcoded primary color or use CSS var if supported by Swal customClass
-                confirmButtonText: "OK",
-            });
-
-            form.reset();
-            btn.innerText = originalText;
-            btn.disabled = false;
+                if (result.success) {
+                    if (result.redirect) {
+                        window.location.href = result.redirect;
+                        return;
+                    }
+                    
+                    Swal.fire({
+                        title: "Thành công!",
+                        html: `Yêu cầu đặt lịch của bạn đã được ghi nhận.<br><br>Ghi nhớ Mã Đơn Hàng của bạn là: <br><strong style="font-size: 1.5em; color: #e1ad01; user-select: auto;">${result.orderCode}</strong><br><br>Vui lòng lưu lại mã này hoặc kiểm tra Email (nếu có cấu hình hệ thống) để sử dụng chức năng <b>Tra Cứu</b>.`,
+                        icon: "success",
+                        confirmButtonColor: '#e1ad01',
+                        confirmButtonText: "Đã hiểu",
+                    }).then(() => {
+                        form.reset();
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Lỗi!",
+                        text: result.message || "Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại sau.",
+                        icon: "error",
+                        confirmButtonColor: '#e1ad01',
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: "Lỗi!",
+                    text: "Lỗi mạng hoặc hệ thống. Vui lòng thử lại.",
+                    icon: "error",
+                    confirmButtonColor: '#e1ad01',
+                });
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
         });
+        
+        // Handle showing/hiding fields based on service type
+        const serviceTypeSelect = document.getElementById('serviceType');
+        const packageSelectContainer = document.getElementById('packageSelectContainer');
+        const rentalPeriodContainer = document.getElementById('rentalPeriodContainer');
+
+        function toggleFields() {
+            const val = serviceTypeSelect.value;
+            if (val === 'photography') {
+                packageSelectContainer.classList.remove('hidden');
+                rentalPeriodContainer.classList.add('hidden');
+            } else if (val === 'costume' || val === 'equipment') {
+                packageSelectContainer.classList.add('hidden');
+                rentalPeriodContainer.classList.remove('hidden');
+                document.querySelector('select[name="packageId"]').value = '';
+            } else {
+                // combined
+                packageSelectContainer.classList.remove('hidden');
+                rentalPeriodContainer.classList.remove('hidden');
+            }
+        }
+
+        serviceTypeSelect.addEventListener('change', toggleFields);
+        toggleFields(); // Init on load
     });
 </script>
 
-<?php include 'includes/footer.php'; ?>
+<?php include 'components/footer.php'; ?>

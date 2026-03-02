@@ -1,30 +1,37 @@
-<?php include 'includes/head.php'; ?>
-<?php include 'includes/header.php'; ?>
+<?php include 'components/head.php'; ?>
+<?php include 'components/header.php'; ?>
 
 <?php
-$services = [
-    [
-        "id" => 1,
-        "title" => "Chụp ảnh Tết",
-        "description" => "Tôn vinh năm mới với những bộ ảnh Áo Dài sang trọng và ảnh gia đình",
-        "image" => "assets/t-t-photography--o-d-i-family-portraits.jpg",
+require_once 'config/db.php';
+// Fetch services from DB
+$stmt = $pdo->prepare("SELECT * FROM services WHERE is_active = 1 LIMIT 3");
+$stmt->execute();
+$dbServices = $stmt->fetchAll();
+
+// Map DB fields to view fields
+$services = [];
+foreach ($dbServices as $svc) {
+    $services[] = [
+        "id" => $svc['id'],
+        "title" => $svc['name'],
+        "description" => $svc['description'],
+        "image" => $svc['image_url'] ?? 'assets/placeholder.jpg',
         "link" => "packages.php",
-    ],
-    [
-        "id" => 2,
-        "title" => "Ảnh Cưới",
-        "description" => "Ghi lại ngày trọng đại của bạn với phong cách nghệ thuật và bất biến",
-        "image" => "assets/wedding-photography-ceremony-reception.jpg",
-        "link" => "packages.php",
-    ],
-    [
-        "id" => 3,
-        "title" => "Ảnh Kỷ Niệm",
-        "description" => "Tôn vinh câu chuyện tình yêu của bạn với chụp ảnh chuyên nghiệp",
-        "image" => "assets/anniversary-photography-couples-portraits.jpg",
-        "link" => "packages.php",
-    ],
-];
+    ];
+}
+
+// Fallback if DB is empty
+if (empty($services)) {
+    $services = [
+        [
+            "id" => 1,
+            "title" => "Chụp ảnh Tết",
+            "description" => "Tôn vinh năm mới với những bộ ảnh Áo Dài sang trọng và ảnh gia đình",
+            "image" => "assets/t-t-photography--o-d-i-family-portraits.jpg",
+            "link" => "packages.php",
+        ],
+    ];
+}
 
 $testimonials = [
     [
@@ -250,4 +257,4 @@ $testimonials = [
     </section>
 </main>
 
-<?php include 'includes/footer.php'; ?>
+<?php include 'components/footer.php'; ?>
