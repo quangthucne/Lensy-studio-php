@@ -1,4 +1,4 @@
-<?php require_once 'components/header.php'; ?>
+<?php require_once 'includes/header.php'; ?>
 <?php requirePermission($pdo, 'manage_products'); ?>
 
 <div class="mb-6 flex justify-between items-center">
@@ -62,4 +62,4 @@ $stmt = $pdo->query("SELECT * FROM categories WHERE is_active = 1 ORDER BY id DE
     </div>
 </div>
 
-<?php require_once 'components/footer.php'; ?>
+<?php require_once 'includes/footer.php'; ?>

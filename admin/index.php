@@ -1,4 +1,4 @@
-<?php require_once 'components/header.php'; ?>
+<?php require_once 'includes/header.php'; ?>
 
 <?php
 // Calculate Stats
@@ -300,4 +300,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php require_once 'components/footer.php'; ?>
+<?php require_once 'includes/footer.php'; ?>

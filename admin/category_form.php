@@ -1,4 +1,4 @@
-<?php require_once 'components/header.php'; ?>
+<?php require_once 'includes/header.php'; ?>
 <?php requirePermission($pdo, 'manage_products'); ?>
 
 <?php
@@ -68,4 +68,4 @@ if ($id) {
     </div>
 </div>
 
-<?php require_once 'components/footer.php'; ?>
+<?php require_once 'includes/footer.php'; ?>

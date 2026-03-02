@@ -1,5 +1,5 @@
 <?php
-require_once 'components/header.php';
+require_once 'includes/header.php';
 requirePermission($pdo, 'manage_products');
 
 $product = null;
@@ -107,4 +107,4 @@ if (isset($_GET['id'])) {
     </div>
 </div>
 
-<?php require_once 'components/footer.php'; ?>
+<?php require_once 'includes/footer.php'; ?>

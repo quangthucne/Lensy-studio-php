@@ -1,10 +1,12 @@
+<?php require_once dirname(__DIR__) . '/config/config.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lensy Studio</title>
-    <link rel="stylesheet" href="css/style.css">
+    <!-- Use BASE_URL from config.php to support nested directories like admin/ -->
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>css/style.css">
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>

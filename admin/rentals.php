@@ -1,4 +1,4 @@
-<?php require_once 'components/header.php'; ?>
+<?php require_once 'includes/header.php'; ?>
 <?php requirePermission($pdo, 'manage_bookings'); ?>
 
 <div class="mb-6 flex justify-between items-center">
@@ -171,4 +171,4 @@ $stmt->execute($params);
     <?php endif; ?>
 </div>
 
-<?php require_once 'components/footer.php'; ?>
+<?php require_once 'includes/footer.php'; ?>

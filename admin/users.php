@@ -1,4 +1,4 @@
-<?php require_once 'components/header.php'; ?>
+<?php require_once 'includes/header.php'; ?>
 <?php requirePermission($pdo, 'manage_users'); ?>
 <div class="mb-6">
     <h2 class="text-2xl font-bold text-gray-800">Quản lý Người Dùng</h2>
@@ -151,4 +151,4 @@ $stmt->execute($params);
     </div>
     <?php endif; ?>
 </div>
-<?php require_once 'components/footer.php'; ?>
+<?php require_once 'includes/footer.php'; ?>
